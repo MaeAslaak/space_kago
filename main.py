@@ -4,6 +4,8 @@ import os
 import random
 import csv
 import button
+import boss
+from boss import lancer_boss 
 
 mixer.init()
 pygame.init()
@@ -25,7 +27,7 @@ ROWS = 16
 COLS = 150
 TILE_SIZE = SCREEN_HEIGHT // ROWS
 TILE_TYPES = 21
-MAX_LEVELS = 3
+MAX_LEVELS = 2
 screen_scroll = 0
 bg_scroll = 0
 level = 1
@@ -202,7 +204,7 @@ class Soldier(pygame.sprite.Sprite):
 
         # jump
         if self.jump == True and self.in_air == False:
-            self.vel_y = -11
+            self.vel_y = -15
             self.jump = False
             self.in_air = True
 
@@ -739,9 +741,15 @@ while run:
                 start_intro = True
                 level += 1
                 bg_scroll = 0
-                world_data = reset_level()
-                if level <= MAX_LEVELS:
-                    # load in level data and create world
+
+                if level > MAX_LEVELS:
+                    pygame.quit()  
+                    boss.lancer_boss() 
+                    start_intro = True
+                    sys.exit()  
+                else:
+                    world_data = reset_level()
+                    # charge le niveau suivant
                     with open(f'level{level}_data.csv', newline='') as csvfile:
                         reader = csv.reader(csvfile, delimiter=',')
                         for x, row in enumerate(reader):
@@ -749,6 +757,7 @@ while run:
                                 world_data[x][y] = int(tile)
                     world = World()
                     player, health_bar = world.process_data(world_data)
+
         else:
             screen_scroll = 0
             if death_fade.fade():
